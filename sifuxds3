@@ -1,0 +1,89 @@
+{
+  "_readme": "Source of truth for the first playable. Change a sheet before changing code. Cells set to null or marked UNVERIFIED must be filled/verified (preflight) before building. Nothing here has been built or tested.",
+
+  "mashup": {
+    "working_title": "Fifty Years of Ash",
+    "one_liner": "A Sifu-style boss gauntlet inside Dark Souls III: climb floor by floor, and every death ages you.",
+    "players": "solo only",
+    "first_playable": "Floor 1 with its boss, plus aging on death",
+    "later": ["Floors 2-5 with bosses", "structure (posture) meter", "unlockable shortcuts", "start-over option"]
+  },
+
+  "games": [
+    {
+      "slug": "dark-souls-3",
+      "role": "primary",
+      "loader": "modengine2 (installed by Melty)",
+      "mod_folder": "{managed}/modengine2/mod",
+      "brings": "world, bosses, combat, items"
+    },
+    {
+      "slug": "sifu",
+      "role": "secondary",
+      "note": "Not in Melty's catalog yet, so it cannot be host or companion. The mod finds Sifu's install folder itself (Steam library folders) and reads from it if present; says in-game when Sifu is not installed. First playable uses Sifu's RULES only (aging, death counter, floors). Optional later: read Sifu audio from the install folder. UNVERIFIED: whether Sifu's UE assets can be played back from a ModEngine2 DLL mod."
+    }
+  ],
+
+  "sheet_systems": [
+    {"id": "age", "start": 20, "max_before_end": 70, "persists_across_floors": true, "reset_on": "start-over", "display": "HUD text (UNVERIFIED how: DLL overlay vs. existing menu text)"},
+    {"id": "death_counter", "start": 0, "increment_per_death": 1, "age_gain_per_death": "equals death_counter after increment, capped at 5", "persists_across_floors": true, "note": "Mirrors Sifu: each death costs more years than the last, up to a cap."},
+    {"id": "run_end", "condition": "age > 70", "result": "run over, return to Floor 1 start at age 20", "UNVERIFIED": "how to end the run cleanly in DS3 (event script vs. DLL)"}
+  ],
+
+  "sheet_aging_tiers": [
+    {"age_from": 20, "age_to": 29, "max_hp_mult": 1.00, "damage_mult": 1.00},
+    {"age_from": 30, "age_to": 39, "max_hp_mult": 0.90, "damage_mult": 1.10},
+    {"age_from": 40, "age_to": 49, "max_hp_mult": 0.80, "damage_mult": 1.20},
+    {"age_from": 50, "age_to": 59, "max_hp_mult": 0.70, "damage_mult": 1.30},
+    {"age_from": 60, "age_to": 70, "max_hp_mult": 0.60, "damage_mult": 1.40},
+    {"_note": "Values are starting guesses for tuning, not verified against DS3 balance. Mechanism UNVERIFIED: SpEffect params applied to the player vs. DLL stat hook."}
+  ],
+
+  "sheet_floors": [
+    {"floor": 1, "area": "Cemetery of Ash / Firelink approach", "boss_id": "boss_floor1", "in_first_playable": true, "shortcut": null, "UNVERIFIED": "area and map ID to drop the player into at age 20; chosen so the player starts in a fight-ready zone"},
+    {"floor": 2, "area": null, "boss_id": null, "in_first_playable": false},
+    {"floor": 3, "area": null, "boss_id": null, "in_first_playable": false},
+    {"floor": 4, "area": null, "boss_id": null, "in_first_playable": false},
+    {"floor": 5, "area": null, "boss_id": null, "in_first_playable": false}
+  ],
+
+  "sheet_bosses": [
+    {"id": "boss_floor1", "name": "Iudex Gundyr", "base_game_boss": true, "arena_reachable_directly": "UNVERIFIED", "reward": "advances to Floor 2 (later); first playable ends with a 'Floor 1 cleared' message", "UNVERIFIED": "how to detect boss defeat (event flag ID)"}
+  ],
+
+  "sheet_loadout": [
+    {"slot": "weapon", "item": "fists or a light weapon (e.g. Dagger)", "item_id": null, "fixed": true},
+    {"slot": "armor", "item": "none", "fixed": true},
+    {"slot": "estus", "item": "reduced or none", "item_id": null, "UNVERIFIED": "whether to keep Estus; decide at tuning"}
+  ],
+
+  "sheet_hooks": [
+    {"hook": "on_player_death", "purpose": "increment death_counter, add years, re-apply tier, respawn at floor start", "mechanism": null},
+    {"hook": "on_boss_defeated", "purpose": "mark floor cleared", "mechanism": null},
+    {"hook": "on_floor_enter", "purpose": "place player, apply fixed loadout", "mechanism": null},
+    {"hook": "apply_age_tier", "purpose": "set max HP and damage multipliers from sheet_aging_tiers", "mechanism": null},
+    {"hook": "hud_age", "purpose": "show age and death counter", "mechanism": null}
+  ],
+
+  "sheet_recipe_draft": {
+    "games": [
+      {"slug": "dark-souls-3", "role": "primary"},
+      {"slug": "sifu", "role": "secondary"}
+    ],
+    "multiplayer": null,
+    "one_click": "must be confirmed with Melty's one_click_check before upload"
+  },
+
+  "preflight_unfilled": [
+    "sheet_floors: floors 2-5 area and boss (not needed for first playable)",
+    "sheet_floors floor 1: map ID / spawn point",
+    "sheet_bosses: boss-defeated event flag ID",
+    "sheet_loadout: item IDs",
+    "sheet_hooks: every mechanism cell (decide DLL vs. event script vs. params)",
+    "sheet_aging_tiers: mechanism and tuning",
+    "sheet_systems.run_end: how to end the run",
+    "games.sifu: existence and format of any Sifu content worth reading (optional for first playable)",
+    "listing: title, tagline, description, credits, license, remix choice",
+    "media: real screenshot of this build running"
+  ]
+}
